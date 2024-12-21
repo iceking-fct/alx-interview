@@ -1,42 +1,5 @@
 #!/usr/bin/python3
-"""Coin Change problem
-"""
-
-
-# custom miminum function
-def min_skip_none(a, b):
-    """Returns the minimum of two numbers ignoring None values
-    """
-    if not a:
-        return b
-    if not b:
-        return a
-    return min(a, b)
-
-
-def changeMaker(coins, total, cache):
-    """Calculates the min_coins for total recursively
-    using a cache to memoize sub values
-    """
-    if total in cache:
-        return cache[total]
-    if total == 0:
-        min_coins = 0
-    else:
-        min_coins = None
-        for coin in coins:
-            amount_left = total - coin
-            if amount_left < 0:
-                continue
-            next_min_coins = changeMaker(coins, amount_left,
-                                         cache)
-            if next_min_coins is None:
-                break
-            min_coins = min_skip_none(min_coins,
-                                      next_min_coins + 1)
-        cache[total] = min_coins
-    return min_coins
-
+"""Coin Change problem"""
 
 def makeChange(coins, total):
     """Determines the fewest number of coins needed to
@@ -54,10 +17,18 @@ def makeChange(coins, total):
        - 0 if total is <= 0
        - -1 if total cannot be met by any number of coins we have
     """
-    if total < 0 or len(coins) == 0:
+    if total <= 0:
+        return 0
+    if not coins:
         return -1
-    cache = {}
-    min_coins = changeMaker(coins, total, cache)
-    if min_coins is None:
-        return -1
-    return min_coins
+
+    # Initialize DP table
+    dp = [float('inf')] * (total + 1)
+    dp[0] = 0  # Base case: 0 coins needed for total of 0
+
+    for coin in coins:
+        for amount in range(coin, total + 1):
+            dp[amount] = min(dp[amount], dp[amount - coin] + 1)
+
+    return dp[total] if dp[total] != float('inf') else -1
+
